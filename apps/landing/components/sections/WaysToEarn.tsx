@@ -10,10 +10,7 @@ export function WaysToEarn(): ReactElement {
 	const [isHovering, set_isHovering] = useState(false);
 
 	return (
-		<div className={'max-w-6xl pt-[160px]'}>
-			<p className={'text-left font-aeonikFono text-3xl font-light text-white md:text-center md:text-5xl'}>
-				{'THERE ARE LOADS OF WAYS TO EARN, WITH YEARN!'}
-			</p>
+		<div className={'max-w-6xl pt-[80px]'}>
 			<div className={'mt-10 grid grid-flow-row grid-cols-12 grid-rows-10 gap-6 md:h-[480px] md:grid-flow-col'}>
 				<Link
 					href={'/apps'}
