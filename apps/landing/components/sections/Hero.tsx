@@ -185,11 +185,11 @@ export function Hero(): ReactElement {
 					className={'mt-[88px]'}
 					src={'/landing/yfi-top-right.png'}
 					alt={'hero'}
-					width={277}
-					height={277}
+					width={250}
+					height={250}
 				/>
 				<div className={'z-20 mt-4 flex flex-col items-center text-center'}>
-					<p className={'text-center text-[48px] font-bold leading-[48px] text-white'}>
+					<p className={'text-center text-[38px] font-medium leading-[42px] text-white'}>
 						{'Earn on your Crypto'}
 					</p>
 					<p

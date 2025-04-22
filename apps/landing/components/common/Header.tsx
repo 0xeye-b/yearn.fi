@@ -59,14 +59,15 @@ export function LandingAppHeader(): ReactElement {
 							<IconBurger />
 						</button>
 					</div>
-					<div className={'flex justify-center'}>
+					<div className={'flex flex-row items-center gap-x-3'}>
 						<Link href={'/'}>
 							<LogoYearn
-								className={'size-10'}
+								className={'size-6'}
 								front={'text-black'}
 								back={'text-white'}
 							/>
 						</Link>
+						<span>{'Yearn'}</span>
 					</div>
 					<Navbar
 						currentPathName={pathname || ''}

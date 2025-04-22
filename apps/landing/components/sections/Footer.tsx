@@ -7,7 +7,7 @@ function FooterContent(): ReactElement {
 		<>
 			<div className={'mb-10 flex flex-col-reverse justify-between gap-y-6 md:flex-row'}>
 				<div>
-					<p className={'font-aeonikFono text-5xl'}>{'TAKE THE BLUE PILL.'}</p>
+					<p className={'text-4xl font-medium'}>{'Take the Blue Pill.'}</p>
 				</div>
 				<div>
 					<LogoYearn
