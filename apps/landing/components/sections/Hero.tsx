@@ -4,7 +4,6 @@ import {z} from 'zod';
 import {motion} from 'framer-motion';
 import {useFetch} from '@builtbymom/web3/hooks/useFetch';
 import {formatAmount} from '@builtbymom/web3/utils';
-import {opacityToHex} from '@common/utils/opacity';
 
 import {Button} from '../common/Button';
 
@@ -139,11 +138,9 @@ export function Hero(): ReactElement {
 							'z-20 mt-[88px] flex flex-col items-center justify-center gap-4 text-center md:mt-[160px]'
 						}>
 						<div
-							className={'flex flex-row items-center justify-center gap-2 px-3 py-1'}
-							style={{
-								background: `#ffffff${opacityToHex(20)}`,
-								borderRadius: '16px'
-							}}>
+							className={
+								'flex flex-row items-center justify-center gap-2 rounded-[16px] bg-white/20 px-3 py-1'
+							}>
 							<div className={'relative flex size-2 items-center justify-center'}>
 								<div
 									className={

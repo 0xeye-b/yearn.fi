@@ -9,7 +9,9 @@ import {PromoPoster} from '@common/components/PromoPoster';
 import {useSearch} from '@common/contexts/useSearch';
 import {LogoDiscord} from '@common/icons/LogoDiscord';
 import {LogoTwitter} from '@common/icons/LogoTwitter';
-import {FEATURED_APPS, INTEGRATIONS_APPS, VAULTS_APPS, YEARN_APPS, YEARN_X_APPS} from '@common/utils/constants';
+import {FEATURED_APPS, INTEGRATIONS_APPS, YEARN_APPS, YEARN_X_APPS} from '@common/utils/constants';
+
+import CombinedVaultsTable from './components/CombinedVaultsTable';
 
 export default function Home(): ReactElement {
 	const router = useRouter();
@@ -57,11 +59,7 @@ export default function Home(): ReactElement {
 					</div>
 
 					<div className={'flex flex-col gap-10'}>
-						<CategorySection
-							title={'Vaults'}
-							onExpandClick={async () => router.push('/apps/vaults')}
-							apps={VAULTS_APPS}
-						/>
+						<CombinedVaultsTable />
 						<CategorySection
 							title={'Yearn Apps'}
 							onExpandClick={async () => router.push('/apps/yearn-apps')}
