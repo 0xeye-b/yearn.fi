@@ -1,8 +1,8 @@
-import {type ReactElement, useRef, useState} from 'react';
+import {Fragment, type ReactElement, useRef, useState} from 'react';
 import {useMountEffect} from '@react-hookz/web';
 import {CarouselControls} from '@common/CarouselControls';
 import {CarouselSlideArrows} from '@common/CarouselSlideArrows';
-import {IconShare} from '@common/icons/IconShare';
+import {CategoryHeading} from '@common/components/CategoryHeading';
 
 import {AppsCarousel} from './AppsCarousel';
 
@@ -10,11 +10,11 @@ import type {TApp} from '@common/types/category';
 
 type TAppSectionProps = {
 	title: string;
-	onExpandClick: () => void;
+	description?: string;
 	apps: TApp[];
 };
 
-export const CategorySection = ({title, onExpandClick, apps}: TAppSectionProps): ReactElement => {
+export const CategorySection = ({title, description, apps}: TAppSectionProps): ReactElement => {
 	const [shuffledApps, set_shuffledApps] = useState<TApp[]>([]);
 	const [currentPage, set_currentPage] = useState(1);
 	const carouselRef = useRef<HTMLDivElement | null>(null);
@@ -96,26 +96,17 @@ export const CategorySection = ({title, onExpandClick, apps}: TAppSectionProps):
 		set_shuffledApps(apps?.toSorted(() => 0.5 - Math.random()));
 	});
 	return (
-		<div className={'flex flex-col overflow-hidden'}>
-			<div className={'mb-6 flex h-10 w-full items-center justify-between pr-1'}>
-				<div className={'flex gap-x-4'}>
-					<div className={'whitespace-nowrap text-lg font-bold text-white'}>{title}</div>
-					<button
-						onClick={onExpandClick}
-						className={
-							'flex items-center rounded-[4px] px-4 py-2 outline !outline-1 outline-gray-600/50 hover:bg-gray-600/40'
-						}>
-						<span className={'mr-2 whitespace-nowrap text-xs text-white'}>{'View all'}</span>
-						<IconShare className={'size-3 text-white'} />
-					</button>
-				</div>
-				{apps?.length > 4 && (
-					<CarouselSlideArrows
-						onScrollBack={onScrollBack}
-						onScrollForward={onScrollForward}
-					/>
-				)}
-			</div>
+		<Fragment>
+			<CategoryHeading
+				title={title}
+				description={description}
+			/>
+			{apps?.length > 4 && (
+				<CarouselSlideArrows
+					onScrollBack={onScrollBack}
+					onScrollForward={onScrollForward}
+				/>
+			)}
 			<AppsCarousel
 				apps={shuffledApps}
 				ref={carouselRef}
@@ -126,6 +117,6 @@ export const CategorySection = ({title, onExpandClick, apps}: TAppSectionProps):
 				onDotsClick={onDotsClick}
 				currentPage={currentPage}
 			/>
-		</div>
+		</Fragment>
 	);
 };

@@ -1,10 +1,12 @@
 import {useEffect, useState} from 'react';
+import {useRouter} from 'next/router';
 import {VaultsListEmpty} from '@vaults/components/list/VaultsListEmpty';
 import {ALL_VAULTS_CATEGORIES_KEYS} from '@vaults/constants';
 import {useVaultFilter} from '@vaults/hooks/useFilteredVaults';
 import {useQueryArguments} from '@vaults/hooks/useVaultsQueryArgs';
 import {ALL_VAULTSV3_CATEGORIES_KEYS, ALL_VAULTSV3_KINDS_KEYS} from '@vaults-v3/constants';
 import {Pagination} from '@common/components/Pagination';
+import {SearchBar} from '@common/components/SearchBar';
 import {useYearn} from '@common/contexts/useYearn';
 
 import {VaultsListHead} from './VaultsListHead';
@@ -76,6 +78,8 @@ function mapToCombinedVaultList(
 function CombinedVaultsTable(): ReactElement {
 	const {isLoadingVaultList} = useYearn();
 	const [page, set_page] = useState(0);
+	const [activeFilter, set_activeFilter] = useState('Popular');
+	const router = useRouter();
 
 	// v2
 	const {types: typesV2} = useQueryArguments({
@@ -129,9 +133,51 @@ function CombinedVaultsTable(): ReactElement {
 		}
 	}, [totalVaults, page]);
 
+	// Handle filter click
+	const handleFilterClick = (filter: string): void => {
+		set_activeFilter(filter);
+		set_page(0);
+
+		// Apply actual filtering logic based on the selected filter
+		const filterMap: {[key: string]: string[]} = {
+			All: ALL_VAULTSV3_KINDS_KEYS,
+			Stables: ['stables'],
+			ETH: ['ethereum'],
+			Curve: ['curve'],
+			Balancer: ['balancer']
+		};
+
+		const newQuery = {...router.query};
+		if (filter === 'All') {
+			delete newQuery.kind;
+		} else {
+			newQuery.kind = filterMap[filter];
+		}
+
+		router.push(
+			{
+				pathname: router.pathname,
+				query: newQuery
+			},
+			undefined,
+			{shallow: true}
+		);
+	};
+
 	if (combinedVaults.isLoading || combinedVaults.isEmpty) {
 		return (
 			<div className={'col-span-12 flex min-h-[240px] w-full flex-col'}>
+				<div className={'my-4 flex flex-wrap items-center gap-2'}>
+					{['All', 'Stables', 'ETH', 'Curve', 'Balancer'].map(filter => (
+						<button
+							key={filter}
+							onClick={() => handleFilterClick(filter)}
+							className={`rounded-full px-4 py-2 text-sm `}>
+							{filter}
+						</button>
+					))}
+				</div>
+
 				<VaultsListHead
 					sortBy={sortBy}
 					sortDirection={sortDirection}
@@ -163,45 +209,71 @@ function CombinedVaultsTable(): ReactElement {
 	}
 
 	return (
-		<div className={'col-span-12 flex min-h-[240px] w-full flex-col'}>
-			<VaultsListHead
-				sortBy={sortBy}
-				sortDirection={sortDirection}
-				onSort={(newSortBy: string, newSortDirection: TSortDirection): void => {
-					if (newSortDirection === '') {
-						onChangeSortBy('featuringScore');
-						onChangeSortDirection('');
-						return;
-					}
-					onChangeSortBy(newSortBy as TPossibleSortBy);
-					onChangeSortDirection(newSortDirection as TSortDirection);
-				}}
-				items={[
-					{label: 'Vault', value: 'name', sortable: true, className: 'col-span-6'},
-					{label: 'Est. APY', value: 'estAPY', sortable: true, className: 'col-span-3'},
-					{
-						label: 'Risk',
-						value: 'score',
-						sortable: true,
-						className: 'col-span-3 whitespace-nowrap'
-					},
-					{label: 'Vault Type', value: 'vaultType', sortable: true, className: 'col-span-3'},
-					{label: 'TVL', value: 'tvl', sortable: true, className: 'col-span-3 justify-end'}
-				]}
-			/>
-			<div className={'grid gap-1'}>{combinedVaults.allVaults.slice(page * pageSize, (page + 1) * pageSize)}</div>
-			{totalVaults > 0 && (
-				<div className={'mt-4'}>
-					<div className={'border-t border-neutral-200/60 p-4'}>
-						<Pagination
-							range={[0, totalVaults]}
-							pageCount={totalVaults / pageSize}
-							numberOfItems={totalVaults}
-							onPageChange={(newPage): void => set_page(newPage.selected)}
-						/>
-					</div>
+		<div>
+			<div className={'mb-4 flex w-full flex-row items-center justify-between gap-2'}>
+				<div className={'flex w-full flex-row flex-wrap items-center gap-2'}>
+					{['Popular', 'New', 'Inactive'].map(filter => (
+						<button
+							key={filter}
+							onClick={() => handleFilterClick(filter)}
+							className={`rounded-full ${activeFilter === filter ? 'bg-white/10' : ''} px-3 py-2 text-sm`}>
+							{filter}
+						</button>
+					))}
 				</div>
-			)}
+				<div>
+					<SearchBar
+						className={'max-w-none rounded-lg border-none bg-white/5 text-neutral-900 md:w-full'}
+						iconClassName={'text-neutral-900 font-[12px]'}
+						searchPlaceholder={'Search'}
+						searchValue={search}
+						onSearch={() => {}}
+					/>
+				</div>
+			</div>
+
+			<div className={'col-span-12 flex min-h-[240px] w-full flex-col'}>
+				<VaultsListHead
+					sortBy={sortBy}
+					sortDirection={sortDirection}
+					onSort={(newSortBy: string, newSortDirection: TSortDirection): void => {
+						if (newSortDirection === '') {
+							onChangeSortBy('featuringScore');
+							onChangeSortDirection('');
+							return;
+						}
+						onChangeSortBy(newSortBy as TPossibleSortBy);
+						onChangeSortDirection(newSortDirection as TSortDirection);
+					}}
+					items={[
+						{label: 'Vault', value: 'name', sortable: true, className: 'col-span-6'},
+						{label: 'Est. APY', value: 'estAPY', sortable: true, className: 'col-span-3'},
+						{
+							label: 'Risk',
+							value: 'score',
+							sortable: true,
+							className: 'col-span-3 whitespace-nowrap'
+						},
+						{label: 'Vault Type', value: 'vaultType', sortable: true, className: 'col-span-3'},
+						{label: 'TVL', value: 'tvl', sortable: true, className: 'col-span-3 justify-end'}
+					]}
+				/>
+				<div className={'grid gap-1'}>
+					{combinedVaults.allVaults.slice(page * pageSize, (page + 1) * pageSize)}
+				</div>
+				{totalVaults > 0 && (
+					<div className={'mt-4'}>
+						<div className={'border-t border-neutral-200/60 p-4'}>
+							<Pagination
+								range={[0, totalVaults]}
+								pageCount={totalVaults / pageSize}
+								numberOfItems={totalVaults}
+								onPageChange={(newPage): void => set_page(newPage.selected)}
+							/>
+						</div>
+					</div>
+				)}
+			</div>
 		</div>
 	);
 }
