@@ -17,7 +17,7 @@ export type TListHead = {
 	onSort: (sortBy: string, sortDirection: TSortDirection) => void;
 };
 
-export function VaultsV3ListHead({items, sortBy, sortDirection, onSort}: TListHead): ReactElement {
+export function VaultsListHead({items, sortBy, sortDirection, onSort}: TListHead): ReactElement {
 	const toggleSortDirection = (newSortBy: string): TSortDirection => {
 		if (sortBy === newSortBy) {
 			if (sortDirection === '') {
@@ -59,7 +59,7 @@ export function VaultsV3ListHead({items, sortBy, sortDirection, onSort}: TListHe
 		<div className={'mt-4 hidden w-full grid-cols-1 md:mt-0 md:grid'}>
 			<div
 				className={cl(
-					'grid w-full grid-cols-1 md:grid-cols-12 px-4 py-2 md:px-8',
+					'grid w-full grid-cols-1 md:grid-cols-12 px-4 py-2 md:px-4',
 					'border-t border-neutral-200 md:border-none',
 					'cursor-pointer'
 				)}>

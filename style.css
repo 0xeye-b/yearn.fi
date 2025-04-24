@@ -457,3 +457,7 @@ input:-webkit-autofill:active {
 p {
 	font-weight: 300;
 }
+
+.font-number {
+	font-weight: 400;
+}

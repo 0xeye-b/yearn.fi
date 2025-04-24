@@ -1,3 +1,5 @@
+import {opacityToHex} from '@common/utils/opacity';
+
 import type {ReactElement} from 'react';
 
 const ChainColors: {[key: number]: string} = {
@@ -19,17 +21,19 @@ const ChainNames: {[key: number]: string} = {
 };
 
 function VaultChainTag({
-	chainID,
-	backgroundOpacity = 100
+	chainID = 1,
+	backgroundOpacity = 0
 }: {
-	chainID: number;
+	chainID?: number;
 	backgroundOpacity?: number;
 }): ReactElement {
-	const textColor = 'text-white/' + backgroundOpacity;
-	const bgColor = `bg-[${ChainColors[chainID]}]/` + backgroundOpacity;
+	const textColor = `#ffffff${opacityToHex(backgroundOpacity)}`;
+	const bgColor = `${ChainColors[chainID]}${opacityToHex(backgroundOpacity)}`;
 	return (
-		<div className={'w-fit'}>
-			<div className={`rounded-2xl ${bgColor} ${textColor} px-3.5 py-1 text-xs`}>{ChainNames[chainID]}</div>
+		<div
+			className={`rounded-2xl px-2 py-0.5 text-xs`}
+			style={{color: textColor, backgroundColor: bgColor}}>
+			{ChainNames[chainID]}
 		</div>
 	);
 }

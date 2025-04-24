@@ -7,8 +7,8 @@ import {ALL_VAULTSV3_CATEGORIES_KEYS, ALL_VAULTSV3_KINDS_KEYS} from '@vaults-v3/
 import {Pagination} from '@common/components/Pagination';
 import {useYearn} from '@common/contexts/useYearn';
 
-import {VaultsV3ListHead} from './VaultsListHead';
-import {VaultsV3ListRow} from './VaultsListRow';
+import {VaultsListHead} from './VaultsListHead';
+import {VaultsListRow} from './VaultsListRow';
 
 import type {ReactElement, ReactNode} from 'react';
 import type {TYDaemonVault} from '@yearn-finance/web-lib/utils/schemas/yDaemonVaultsSchemas';
@@ -20,15 +20,6 @@ type TCombinedVaultList = {
 	isEmpty: boolean;
 	allVaults: ReactNode[];
 };
-
-function processVault(vault: TYDaemonVault, version: 'v2' | 'v3'): ReactElement {
-	return (
-		<VaultsV3ListRow
-			currentVault={vault}
-			isV2={version === 'v2'}
-		/>
-	);
-}
 
 function mapToCombinedVaultList(
 	v2Vaults: TYDaemonVault[],
@@ -60,8 +51,18 @@ function mapToCombinedVaultList(
 		};
 	}
 
-	const processedV2Vaults = filteredV2ByChains.map(vault => processVault(vault, 'v2'));
-	const processedV3Vaults = filteredV3ByChains.map(vault => processVault(vault, 'v3'));
+	const processedV2Vaults = filteredV2ByChains.map(vault => (
+		<VaultsListRow
+			currentVault={vault}
+			isV2={true}
+		/>
+	));
+	const processedV3Vaults = filteredV3ByChains.map(vault => (
+		<VaultsListRow
+			currentVault={vault}
+			isV2={false}
+		/>
+	));
 
 	const combined = [...processedV3Vaults, ...processedV2Vaults];
 
@@ -110,15 +111,15 @@ function CombinedVaultsTable(): ReactElement {
 
 	// Setup pagination
 	const combinedVaults = mapToCombinedVaultList(
-		activeVaultsV2.slice(0, 4),
-		activeVaultsV3.slice(0, 4),
+		activeVaultsV2,
+		activeVaultsV3,
 		chains,
 		search,
 		typesV3 ?? [],
 		isLoadingVaultList
 	);
 	const totalVaults = combinedVaults.allVaults.length;
-	const pageSize = 20;
+	const pageSize = 10;
 
 	// Reset pagination when search results change
 	useEffect(() => {
@@ -131,7 +132,7 @@ function CombinedVaultsTable(): ReactElement {
 	if (combinedVaults.isLoading || combinedVaults.isEmpty) {
 		return (
 			<div className={'col-span-12 flex min-h-[240px] w-full flex-col'}>
-				<VaultsV3ListHead
+				<VaultsListHead
 					sortBy={sortBy}
 					sortDirection={sortDirection}
 					onSort={(newSortBy: string, newSortDirection: TSortDirection): void => {
@@ -145,27 +146,25 @@ function CombinedVaultsTable(): ReactElement {
 					}}
 					items={[
 						{label: 'Vault', value: 'name', sortable: true, className: 'col-span-6'},
-						{label: '', value: 'APY', sortable: false, className: 'col-span-2'},
-						{label: 'Est. APY', value: 'estAPY', sortable: true, className: 'col-span-2'},
+						{label: 'Est. APY', value: 'estAPY', sortable: true, className: 'col-span-3'},
 						{
-							label: 'Risk Level',
+							label: 'Risk',
 							value: 'score',
 							sortable: true,
-							className: 'col-span-2 whitespace-nowrap'
+							className: 'col-span-3 whitespace-nowrap'
 						},
-						{label: 'Available', value: 'available', sortable: true, className: 'col-span-2'},
-						{label: 'Holdings', value: 'deposited', sortable: true, className: 'col-span-2'},
-						{label: 'Deposits', value: 'tvl', sortable: true, className: 'col-span-2 justify-end'}
+						{label: 'Vault Type', value: 'vaultType', sortable: true, className: 'col-span-3'},
+						{label: 'TVL', value: 'tvl', sortable: true, className: 'col-span-3 justify-end'}
 					]}
 				/>
-				<div className={'grid gap-4'}>{combinedVaults.allVaults}</div>
+				<div className={'grid gap-1'}>{combinedVaults.allVaults}</div>
 			</div>
 		);
 	}
 
 	return (
 		<div className={'col-span-12 flex min-h-[240px] w-full flex-col'}>
-			<VaultsV3ListHead
+			<VaultsListHead
 				sortBy={sortBy}
 				sortDirection={sortDirection}
 				onSort={(newSortBy: string, newSortDirection: TSortDirection): void => {
@@ -179,20 +178,18 @@ function CombinedVaultsTable(): ReactElement {
 				}}
 				items={[
 					{label: 'Vault', value: 'name', sortable: true, className: 'col-span-6'},
-					{label: '', value: 'APY', sortable: false, className: 'col-span-2'},
-					{label: 'Est. APY', value: 'estAPY', sortable: true, className: 'col-span-2'},
+					{label: 'Est. APY', value: 'estAPY', sortable: true, className: 'col-span-3'},
 					{
 						label: 'Risk',
 						value: 'score',
 						sortable: true,
-						className: 'col-span-2 whitespace-nowrap'
+						className: 'col-span-3 whitespace-nowrap'
 					},
-					{label: 'Available', value: 'available', sortable: true, className: 'col-span-2'},
-					{label: 'Holdings', value: 'deposited', sortable: true, className: 'col-span-2'},
-					{label: 'Deposits', value: 'tvl', sortable: true, className: 'col-span-2 justify-end'}
+					{label: 'Vault Type', value: 'vaultType', sortable: true, className: 'col-span-3'},
+					{label: 'TVL', value: 'tvl', sortable: true, className: 'col-span-3 justify-end'}
 				]}
 			/>
-			<div className={'grid gap-4'}>{combinedVaults.allVaults.slice(page * pageSize, (page + 1) * pageSize)}</div>
+			<div className={'grid gap-1'}>{combinedVaults.allVaults.slice(page * pageSize, (page + 1) * pageSize)}</div>
 			{totalVaults > 0 && (
 				<div className={'mt-4'}>
 					<div className={'border-t border-neutral-200/60 p-4'}>

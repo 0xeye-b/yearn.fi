@@ -4,12 +4,10 @@ import {cl, formatAmount, isZero, toAddress, toNormalizedBN} from '@builtbymom/w
 import {VaultChainTag} from '@vaults-v3/components/VaultChainTag';
 import {Renderable} from '@yearn-finance/web-lib/components/Renderable';
 import {IconLinkOut} from '@yearn-finance/web-lib/icons/IconLinkOut';
-import {ETH_TOKEN_ADDRESS, WETH_TOKEN_ADDRESS, WFTM_TOKEN_ADDRESS} from '@yearn-finance/web-lib/utils/constants';
 import {getNetwork} from '@yearn-finance/web-lib/utils/wagmi/utils';
 import {ImageWithFallback} from '@common/components/ImageWithFallback';
 import {RenderAmount} from '@common/components/RenderAmount';
 import {useYearn} from '@common/contexts/useYearn';
-import {useYearnBalance} from '@common/hooks/useYearnBalance';
 
 import type {ReactElement} from 'react';
 import type {TYDaemonVault} from '@yearn-finance/web-lib/utils/schemas/yDaemonVaultsSchemas';
@@ -318,7 +316,7 @@ function VaultForwardAPY({currentVault}: {currentVault: TYDaemonVault}): ReactEl
 							shouldRender={!currentVault.apr.forwardAPR?.type.includes('new')}
 							/* TEMPORARY CODE TO NOTIFY 2500 ARB PER WEEK REWARD FOR SOME VAULTS */
 							fallback={'NEW'}>
-							<div className={'flex flex-col'}>
+							<div className={'flex flex-col items-end'}>
 								{estAPYRange ? (
 									<Fragment>
 										<RenderAmount
@@ -432,7 +430,7 @@ function VaultRiskScoreTag({riskLevel}: {riskLevel: number}): ReactElement {
 	const level = riskLevel < 0 ? 0 : riskLevel > 5 ? 5 : riskLevel;
 	const riskColor = [`transparent`, `#63C532`, `#F8A908`, `#F8A908`, `#C73203`, `#C73203`];
 	return (
-		<div className={'md:justify-centere col-span-2 flex flex-row items-end justify-between md:flex-col md:pt-4'}>
+		<div className={'md:justify-centere col-span-3 flex flex-row items-end justify-between md:flex-col md:pt-4'}>
 			<p className={'inline whitespace-nowrap text-start text-xs text-neutral-800/60 md:hidden'}>
 				{'Risk Score'}
 			</p>
@@ -441,9 +439,11 @@ function VaultRiskScoreTag({riskLevel}: {riskLevel: number}): ReactElement {
 					'flex w-fit items-center justify-end gap-4 md:justify-center',
 					'tooltip relative z-50 h-6'
 				)}>
-				<div className={'h-3 w-10 min-w-10 rounded-sm border-2 border-neutral-400 p-[2px]'}>
+				<div
+					className={'h-3 w-10 min-w-10 rounded-sm border border-neutral-300 p-[2px]'}
+					style={{borderWidth: '1px'}}>
 					<div
-						className={'h-1 rounded-[1px]'}
+						className={'h-1.5 rounded-[1px]'}
 						style={{
 							backgroundColor: riskColor.length > level ? riskColor[level] : riskColor[0],
 							width: `${(level / 5) * 100}%`
@@ -520,125 +520,83 @@ export function VaultStakedAmount({currentVault}: {currentVault: TYDaemonVault})
 	);
 }
 
-export function VaultsV3ListRow({currentVault, isV2}: {currentVault: TYDaemonVault; isV2: boolean}): ReactElement {
-	const balanceOfWant = useYearnBalance({chainID: currentVault.chainID, address: currentVault.token.address});
-	const balanceOfCoin = useYearnBalance({chainID: currentVault.chainID, address: ETH_TOKEN_ADDRESS});
-	const balanceOfWrappedCoin = useYearnBalance({
-		chainID: currentVault.chainID,
-		address: toAddress(currentVault.token.address) === WFTM_TOKEN_ADDRESS ? WFTM_TOKEN_ADDRESS : WETH_TOKEN_ADDRESS //TODO: Create a wagmi Chain upgrade to add the chain wrapper token address
-	});
-	const availableToDeposit = useMemo((): bigint => {
-		if (toAddress(currentVault.token.address) === WETH_TOKEN_ADDRESS) {
-			return balanceOfWrappedCoin.raw + balanceOfCoin.raw;
-		}
-		if (toAddress(currentVault.token.address) === WFTM_TOKEN_ADDRESS) {
-			return balanceOfWrappedCoin.raw + balanceOfCoin.raw;
-		}
-		return balanceOfWant.raw;
-	}, [balanceOfCoin.raw, balanceOfWant.raw, balanceOfWrappedCoin.raw, currentVault.token.address]);
-
+export function VaultsListRow({currentVault, isV2}: {currentVault: TYDaemonVault; isV2: boolean}): ReactElement {
 	const href = isV2
 		? `/vaults/${currentVault.chainID}/${toAddress(currentVault.address)}`
 		: `/v3/${currentVault.chainID}/${toAddress(currentVault.address)}`;
 
 	return (
 		<Link
-			key={`${currentVault.address}`}
+			key={`${currentVault.address}-${currentVault.chainID}`}
 			href={href}
 			scroll={false}>
-			<div
-				className={cl(
-					'grid w-full grid-cols-1 md:grid-cols-12 ',
-					'p-4 md:pr-10',
-					'cursor-pointer relative group'
-				)}>
+			<div className={cl('grid w-full grid-cols-1 md:grid-cols-12 ', 'md:px-4', 'cursor-pointer relative group')}>
 				<div
 					className={cl(
 						'absolute inset-0 rounded-[12px]',
 						'opacity-20 transition-opacity group-hover:opacity-100 pointer-events-none',
-						'bg-[linear-gradient(80deg,_#2C3DA6,_#D21162)]'
+						isV2
+							? 'bg-[linear-gradient(80deg,_#7C3DA6,_#221162)]'
+							: 'bg-[linear-gradient(80deg,_#2C3DA6,_#D21162)]'
 					)}
 				/>
 
-				<div className={cl('col-span-4 z-10', 'flex flex-row  justify-between')}>
-					<div className={'flex flex-row gap-6 pr-10'}>
-						<div className={'size-8 min-h-8 min-w-8 rounded-full md:flex'}>
-							<div className={'flex flex-col gap-2'}>
-								<div className={'flex flex-row items-center gap-2'}>
-									<ImageWithFallback
-										src={`${process.env.BASE_YEARN_ASSETS_URI}/${currentVault.chainID}/${currentVault.token.address}/logo-128.png`}
-										alt={``}
-										width={20}
-										height={20}
-									/>
-									<p
-										title={currentVault.name}
-										className={'md:text-md block truncate text-neutral-800 '}>
-										{currentVault.name.replace(/(Yearn |v2|v3)/gi, '')}
-									</p>
-								</div>
-								<div className={' flex flex-row items-center gap-2'}>
-									<VaultChainTag
-										chainID={currentVault.chainID}
-										backgroundOpacity={50}
-									/>
-									<p
-										className={
-											' block rounded-full bg-neutral-100 px-2 py-1 text-xs text-neutral-800/60 '
-										}>
-										{isV2 ? 'V2' : 'V3'}
-									</p>
-								</div>
+				<div className={cl('col-span-4 z-10', 'flex flex-row items-center justify-between')}>
+					<div className={'flex w-full flex-row items-center gap-3'}>
+						<div
+							className={'relative flex size-8 min-h-8 min-w-8 items-center justify-center rounded-full'}>
+							<ImageWithFallback
+								src={`${process.env.BASE_YEARN_ASSETS_URI}/${currentVault.chainID}/${currentVault.token.address}/logo-128.png`}
+								alt={``}
+								width={24}
+								height={24}
+							/>
+						</div>
+						<div className={'flex flex-col gap-1.5'}>
+							<div className={'flex flex-row items-center'}>
+								<p
+									title={currentVault.name}
+									className={'md:text-md block w-full truncate text-neutral-800'}>
+									{currentVault.name.replace(/(Yearn |v2|v3)/gi, '')}
+								</p>
 							</div>
 						</div>
 					</div>
 				</div>
 
 				<div className={cl('col-span-8 z-10', 'grid grid-cols-2 md:grid-cols-12 gap-4', 'mt-4 md:mt-0')}>
-					<div className={'col-span-2'}></div>
 					<div
-						className={'yearn--table-data-section-item col-span-2 flex-row md:flex-col'}
+						className={'flex-column col-span-3 flex items-center justify-end'}
 						datatype={'number'}>
-						<p className={'inline text-start text-xs text-neutral-800/60 md:hidden'}>{'Estimated APY'}</p>
+						<p className={'inline w-full text-start text-xs text-neutral-800/60 md:hidden'}>
+							{'Estimated APY'}
+						</p>
 						<VaultForwardAPY currentVault={currentVault} />
 					</div>
 
-					<VaultRiskScoreTag riskLevel={currentVault.info.riskLevel} />
+					<div className={'col-span-3'}>
+						<VaultRiskScoreTag riskLevel={currentVault.info.riskLevel} />
+					</div>
 
 					<div
-						className={'yearn--table-data-section-item col-span-2 flex-row md:flex-col'}
+						className={'flex-column col-span-3 flex items-center justify-end'}
 						datatype={'number'}>
-						<p className={'inline text-start text-xs text-neutral-800/60 md:hidden'}>{'Available'}</p>
-						<p
-							className={`yearn--table-data-section-item-value ${
-								isZero(availableToDeposit) ? 'text-neutral-400' : 'text-neutral-900'
-							}`}>
-							<RenderAmount
-								value={availableToDeposit}
-								symbol={currentVault.token.symbol}
-								decimals={currentVault.token.decimals}
-								options={{
-									shouldDisplaySymbol: false,
-									maximumFractionDigits:
-										Number(
-											toNormalizedBN(availableToDeposit, currentVault.token.decimals).normalized
-										) > 1000
-											? 2
-											: 4
-								}}
-							/>
+						<p className={'inline w-full text-start text-xs text-neutral-800/60 md:hidden'}>
+							{'Vault Type'}
 						</p>
+						<div className={'flex w-full flex-row items-center justify-end gap-1'}>
+							<VaultChainTag
+								chainID={currentVault.chainID}
+								backgroundOpacity={50}
+							/>
+							<p className={'block rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-800/60'}>
+								{isV2 ? 'V2' : 'V3'}
+							</p>
+						</div>
 					</div>
 
 					<div
-						className={'yearn--table-data-section-item col-span-2 flex-row md:flex-col'}
-						datatype={'number'}>
-						<p className={'inline text-start text-xs text-neutral-800/60 md:hidden'}>{'Deposited'}</p>
-						<VaultStakedAmount currentVault={currentVault} />
-					</div>
-
-					<div
-						className={'yearn--table-data-section-item col-span-2 flex-row md:flex-col'}
+						className={'yearn--table-data-section-item col-span-3 flex-row md:flex-col'}
 						datatype={'number'}>
 						<p className={'inline text-start text-xs text-neutral-800/60 md:hidden'}>{'TVL'}</p>
 						<div className={'flex flex-col pt-0 text-right'}>

@@ -1,33 +1,19 @@
-import {type ReactElement, useRef} from 'react';
+import {type ReactElement} from 'react';
 import {useRouter} from 'next/router';
 import {useMountEffect} from '@react-hookz/web';
-import {CarouselSlideArrows} from '@common/CarouselSlideArrows';
-import {AppsCarousel} from '@common/components/AppsCarousel';
 import {CategorySection} from '@common/components/CategorySection';
 import {Cutaway} from '@common/components/Cutaway';
 import {PromoPoster} from '@common/components/PromoPoster';
 import {useSearch} from '@common/contexts/useSearch';
 import {LogoDiscord} from '@common/icons/LogoDiscord';
 import {LogoTwitter} from '@common/icons/LogoTwitter';
-import {FEATURED_APPS, INTEGRATIONS_APPS, YEARN_APPS, YEARN_X_APPS} from '@common/utils/constants';
+import {YEARN_APPS} from '@common/utils/constants';
 
 import CombinedVaultsTable from './components/CombinedVaultsTable';
 
 export default function Home(): ReactElement {
 	const router = useRouter();
 	const {dispatch} = useSearch();
-
-	const carouselRef = useRef<HTMLDivElement | null>(null);
-
-	const onScrollBack = (): void => {
-		if (!carouselRef.current) return;
-		carouselRef.current.scrollLeft -= 400;
-	};
-
-	const onScrollForward = (): void => {
-		if (!carouselRef.current) return;
-		carouselRef.current.scrollLeft += 400;
-	};
 
 	useMountEffect(() => {
 		dispatch({searchValue: ''});
@@ -41,40 +27,13 @@ export default function Home(): ReactElement {
 						<PromoPoster />
 					</div>
 
-					<div>
-						<div className={'mb-6 flex items-start justify-between'}>
-							<p className={'w-full text-lg font-bold text-white'}>{'Featured Apps'}</p>
-							<CarouselSlideArrows
-								onScrollBack={onScrollBack}
-								onScrollForward={onScrollForward}
-								className={'w-auto'}
-							/>
-						</div>
-
-						<AppsCarousel
-							ref={carouselRef}
-							apps={FEATURED_APPS}
-							isUsingFeatured={true}
-						/>
-					</div>
-
 					<div className={'flex flex-col gap-10'}>
-						<CombinedVaultsTable />
 						<CategorySection
 							title={'Yearn Apps'}
 							onExpandClick={async () => router.push('/apps/yearn-apps')}
 							apps={YEARN_APPS}
 						/>
-						<CategorySection
-							title={'Yearn X Projects'}
-							onExpandClick={async () => router.push('/apps/yearn-x')}
-							apps={YEARN_X_APPS}
-						/>
-						<CategorySection
-							title={'Integrations'}
-							onExpandClick={async () => router.push('/apps/integrations')}
-							apps={INTEGRATIONS_APPS}
-						/>
+						<CombinedVaultsTable />
 					</div>
 				</div>
 				<div className={'mt-16 flex w-full flex-col gap-6 md:flex-row'}>
