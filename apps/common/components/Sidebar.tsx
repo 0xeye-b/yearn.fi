@@ -18,7 +18,7 @@ export function Sidebar(props: TSidebarProps): ReactElement {
 	return (
 		<div
 			className={
-				'flex h-full w-72 flex-col justify-between rounded-lg border border-gray-700/50 bg-gradient-to-b from-gray-900 to-[#1A1A1A] py-6 text-white'
+				'flex h-full w-72 flex-col justify-between rounded-lg  from-gray-900 to-[#1A1A1A] py-6 text-white'
 			}>
 			<div className={'flex flex-col gap-y-4 '}>
 				<div className={'mb-4 ml-2 flex flex-row items-center gap-x-3 px-4'}>
