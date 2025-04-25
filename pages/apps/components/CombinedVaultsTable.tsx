@@ -1,5 +1,4 @@
 import {useEffect, useState} from 'react';
-import {useRouter} from 'next/router';
 import {VaultsListEmpty} from '@vaults/components/list/VaultsListEmpty';
 import {ALL_VAULTS_CATEGORIES_KEYS} from '@vaults/constants';
 import {useVaultFilter} from '@vaults/hooks/useFilteredVaults';
@@ -79,7 +78,6 @@ function CombinedVaultsTable(): ReactElement {
 	const {isLoadingVaultList} = useYearn();
 	const [page, set_page] = useState(0);
 	const [activeFilter, set_activeFilter] = useState('Popular');
-	const router = useRouter();
 
 	// v2
 	const {types: typesV2} = useQueryArguments({
@@ -137,31 +135,6 @@ function CombinedVaultsTable(): ReactElement {
 	const handleFilterClick = (filter: string): void => {
 		set_activeFilter(filter);
 		set_page(0);
-
-		// Apply actual filtering logic based on the selected filter
-		const filterMap: {[key: string]: string[]} = {
-			All: ALL_VAULTSV3_KINDS_KEYS,
-			Stables: ['stables'],
-			ETH: ['ethereum'],
-			Curve: ['curve'],
-			Balancer: ['balancer']
-		};
-
-		const newQuery = {...router.query};
-		if (filter === 'All') {
-			delete newQuery.kind;
-		} else {
-			newQuery.kind = filterMap[filter];
-		}
-
-		router.push(
-			{
-				pathname: router.pathname,
-				query: newQuery
-			},
-			undefined,
-			{shallow: true}
-		);
 	};
 
 	if (combinedVaults.isLoading || combinedVaults.isEmpty) {
