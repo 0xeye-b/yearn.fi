@@ -84,7 +84,7 @@ const WithLayout = memo(function WithLayout(
 								/>
 							</motion.nav>
 						)}
-						<motion.nav className={'top-0 z-20 hidden h-screen py-4 pl-4 md:fixed md:block'}>
+						<motion.nav className={'top-0 z-20 hidden h-screen py-10 pl-4 md:fixed md:block'}>
 							<Sidebar tabs={MENU_TABS} />
 						</motion.nav>
 						<LazyMotion features={domAnimation}>
