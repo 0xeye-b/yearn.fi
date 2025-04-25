@@ -3,7 +3,7 @@ import Link from 'next/link';
 import {z} from 'zod';
 import {motion} from 'framer-motion';
 import {useFetch} from '@builtbymom/web3/hooks/useFetch';
-import {formatAmount} from '@builtbymom/web3/utils';
+import {TvlStat} from '@common/components/TvlStat';
 
 import {Button} from '../common/Button';
 
@@ -137,25 +137,7 @@ export function Hero(): ReactElement {
 						className={
 							'z-20 mt-[88px] flex flex-col items-center justify-center gap-4 text-center md:mt-[160px]'
 						}>
-						<div
-							className={
-								'flex flex-row items-center justify-center gap-2 rounded-[16px] bg-white/20 px-3 py-1'
-							}>
-							<div className={'relative flex size-2 items-center justify-center'}>
-								<div
-									className={
-										'absolute size-2 animate-[ping_3s_ease-in-out_infinite] rounded-full bg-[#ffffff] opacity-75'
-									}></div>
-								<div className={'relative size-2 rounded-full bg-[#ccc]'}></div>
-							</div>
-							<p className={'text-[14px] text-white'}>
-								<span className={'text-[14px] text-white opacity-75'}>{'$'}</span>
-								{formatAmount(tvl ?? 0, 0, 0)}
-								<span className={'text-[14px] text-white opacity-75'}>
-									{' deposited in Yearn Vaults'}
-								</span>
-							</p>
-						</div>
+						<TvlStat tvl={tvl ?? 0} />
 						<div className={'z-20 flex flex-col items-center justify-center pt-2 text-center'}>
 							<p className={'text-[56px] font-medium text-white'}>{'Earn on your Crypto'}</p>
 							<p className={'mt-1 text-[20px] text-gray-400'}>
