@@ -234,48 +234,38 @@ export function ActionFlowContextApp(props: {children: ReactNode; currentVault: 
 					address: props.currentVault.address,
 					abi: VAULT_V3_ABI,
 					chainId: props.currentVault.chainID,
-					functionName: 'maxRedeem',
-					args: [toAddress(address), toBigInt(maxLoss)]
-				},
-				{
-					address: props.currentVault.address,
-					abi: VAULT_V3_ABI,
-					chainId: props.currentVault.chainID,
 					functionName: 'balanceOf',
 					args: [toAddress(address)]
 				}
 			]
 		});
-		const balanceOf = decodeAsBigInt(results[3], 0n);
-		try {
-			const maxEffectiveWithdraw = await simulateContract(retrieveConfig(), {
-				abi: VAULT_ABI,
-				address: props.currentVault.address,
-				chainId: props.currentVault.chainID,
-				functionName: 'withdraw',
-				args: [balanceOf]
-			});
 
-			if (props.currentVault.version.startsWith('3') || props.currentVault.version.startsWith('~3')) {
+		const maxDeposit = decodeAsBigInt(results[0], decodeAsBigInt(results[1], 0n));
+		const maxRedeem = decodeAsBigInt(results[2], 0n);
+
+		try {
+			// This throws if Vault is V3 as withdraw(balance) does not exist on V3 Vaults.
+			const isV3 = props.currentVault.version.startsWith('3') || props.currentVault.version.startsWith('~3');
+
+			if (!isV3) {
+				const maxEffectiveWithdraw = await simulateContract(retrieveConfig(), {
+					abi: VAULT_ABI,
+					address: props.currentVault.address,
+					chainId: props.currentVault.chainID,
+					functionName: 'withdraw',
+					args: [maxRedeem]
+				});
 				set_limits({
-					maxDeposit: decodeAsBigInt(results[0], decodeAsBigInt(results[1], 0n)),
-					maxRedeem: decodeAsBigInt(results[2], decodeAsBigInt(results[3], 0n))
+					maxDeposit,
+					maxRedeem: maxEffectiveWithdraw ? maxEffectiveWithdraw.result : maxRedeem
 				});
 			} else {
-				set_limits({
-					maxDeposit: decodeAsBigInt(results[0], decodeAsBigInt(results[1], 0n)),
-					maxRedeem: maxEffectiveWithdraw
-						? maxEffectiveWithdraw.result
-						: decodeAsBigInt(results[2], decodeAsBigInt(results[3], 0n))
-				});
+				set_limits({maxDeposit, maxRedeem});
 			}
 		} catch (error) {
-			set_limits({
-				maxDeposit: decodeAsBigInt(results[0], decodeAsBigInt(results[1], 0n)),
-				maxRedeem: decodeAsBigInt(results[2], decodeAsBigInt(results[3], 0n))
-			});
+			set_limits({maxDeposit, maxRedeem});
 		}
-	}, [props.currentVault, address, maxLoss]);
+	}, [props.currentVault, address]);
 
 	/**********************************************************************************************
 	 ** This reducer is used to manage the actionParams state variable and update the different
